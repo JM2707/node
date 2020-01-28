@@ -33,9 +33,8 @@ initial input, or when referenced by `import` statements within ES module code:
 
 * Files ending in `.mjs`.
 
-* Files ending in `.js`, or extensionless files, when the nearest parent
-  `package.json` file contains a top-level field `"type"` with a value of
-  `"module"`.
+* Files ending in `.js` when the nearest parent `package.json` file contains a
+  top-level field `"type"` with a value of `"module"`.
 
 * Strings passed in as an argument to `--eval` or `--print`, or piped to
   `node` via `STDIN`, with the flag `--input-type=module`.
@@ -50,18 +49,17 @@ or when referenced by `import` statements within ES module code:
 
 * Files ending in `.cjs`.
 
-* Files ending in `.js`, or extensionless files, when the nearest parent
-  `package.json` file contains a top-level field `"type"` with a value of
-  `"commonjs"`.
+* Files ending in `.js` when the nearest parent `package.json` file contains a
+  top-level field `"type"` with a value of `"commonjs"`.
 
 * Strings passed in as an argument to `--eval` or `--print`, or piped to
   `node` via `STDIN`, with the flag `--input-type=commonjs`.
 
 ### `package.json` `"type"` field
 
-Files ending with `.js` or lacking any extension will be loaded as ES modules
-when the nearest parent `package.json` file contains a top-level field `"type"`
-with a value of `"module"`.
+Files ending with `.js` will be loaded as ES modules when the nearest parent
+`package.json` file contains a top-level field `"type"` with a value of
+`"module"`.
 
 The nearest parent `package.json` is defined as the first `package.json` found
 when searching in the current folder, that folder’s parent, and so on up
@@ -81,14 +79,12 @@ node my-app.js # Runs as ES module
 ```
 
 If the nearest parent `package.json` lacks a `"type"` field, or contains
-`"type": "commonjs"`, extensionless and `.js` files are treated as CommonJS.
-If the volume root is reached and no `package.json` is found,
-Node.js defers to the default, a `package.json` with no `"type"`
-field. "Extensionless" refers to file paths which do not contain
-an extension as opposed to optionally dropping a file extension in a specifier.
+`"type": "commonjs"`, `.js` files are treated as CommonJS. If the volume root is
+reached and no `package.json` is found, Node.js defers to the default, a
+`package.json` with no `"type"` field.
 
-`import` statements of `.js` and extensionless files are treated as ES modules
-if the nearest parent `package.json` contains `"type": "module"`.
+`import` statements of `.js` files are treated as ES modules if the nearest
+parent `package.json` contains `"type": "module"`.
 
 ```js
 // my-app.js, part of the same example as above
@@ -106,14 +102,13 @@ as ES modules and `.cjs` files are always treated as CommonJS.
 
 ### Package Scope and File Extensions
 
-A folder containing a `package.json` file, and all subfolders below that
-folder down until the next folder containing another `package.json`, is
-considered a _package scope_. The `"type"` field defines how `.js` and
-extensionless files should be treated within a particular `package.json` file’s
-package scope. Every package in a project’s `node_modules` folder contains its
-own `package.json` file, so each project’s dependencies have their own package
-scopes. A `package.json` lacking a `"type"` field is treated as if it contained
-`"type": "commonjs"`.
+A folder containing a `package.json` file, and all subfolders below that folder
+down until the next folder containing another `package.json`, is considered a
+_package scope_. The `"type"` field defines how `.js` files should be treated
+within a particular `package.json` file’s package scope. Every package in a
+project’s `node_modules` folder contains its own `package.json` file, so each
+project’s dependencies have their own package scopes. A `package.json` lacking a
+`"type"` field is treated as if it contained `"type": "commonjs"`.
 
 The package scope applies not only to initial entry points (`node my-app.js`)
 but also to files referenced by `import` statements and `import()` expressions.
@@ -349,20 +344,13 @@ The conditions supported in Node.js condition matching:
    or ES module file.
 * `"import"` - matched when the package is loaded via `import` or
    `import()`. Can be any module format, this field does not set the type
-   interpretation. _This is currently only supported behind the
-   `--experimental-conditional-exports` flag._
+   interpretation.
 * `"node"` - matched for any Node.js environment. Can be a CommonJS or ES
-   module file. _This is currently only supported behind the
-   `--experimental-conditional-exports` flag._
+   module file.
 * `"require"` - matched when the package is loaded via `require()`.
-   _This is currently only supported behind the
-   `--experimental-conditional-exports` flag._
 
 Condition matching is applied in object order from first to last within the
 `"exports"` object.
-
-> Setting the above conditions for a published package is not recommended until
-> conditional exports have been unflagged to avoid breaking changes to packages.
 
 Using the `"require"` condition it is possible to define a package that will
 have a different exported value for CommonJS and ES modules, which can be a
@@ -456,10 +444,10 @@ ignores) the top-level `"module"` field.
 Node.js can now run ES module entry points, and a package can contain both
 CommonJS and ES module entry points (either via separate specifiers such as
 `'pkg'` and `'pkg/es-module'`, or both at the same specifier via [Conditional
-Exports][] with the `--experimental-conditional-exports` flag). Unlike in the
-scenario where `"module"` is only used by bundlers, or ES module files are
-transpiled into CommonJS on the fly before evaluation by Node.js, the files
-referenced by the ES module entry point are evaluated as ES modules.
+Exports][]). Unlike in the scenario where `"module"` is only used by bundlers,
+or ES module files are transpiled into CommonJS on the fly before evaluation by
+Node.js, the files referenced by the ES module entry point are evaluated as ES
+modules.
 
 #### Dual Package Hazard
 
@@ -518,13 +506,8 @@ following conditions:
 
 Write the package in CommonJS or transpile ES module sources into CommonJS, and
 create an ES module wrapper file that defines the named exports. Using
-[Conditional Exports][] via the `--experimental-conditional-exports` flag, the
-ES module wrapper is used for `import` and the CommonJS entry point for
-`require`.
-
-> Note: While `--experimental-conditional-exports` is flagged, a package
-> using this pattern will throw when loaded unless package consumers use the
-> `--experimental-conditional-exports` flag.
+[Conditional Exports][], the ES module wrapper is used for `import` and the
+CommonJS entry point for `require`.
 
 <!-- eslint-skip -->
 ```js
@@ -580,13 +563,13 @@ This approach is appropriate for any of the following use cases:
 * The package stores internal state, and the package author would prefer not to
   refactor the package to isolate its state management. See the next section.
 
-A variant of this approach not requiring `--experimental-conditional-exports`
-for consumers could be to add an export, e.g. `"./module"`, to point to an
-all-ES module-syntax version of the package. This could be used via `import
-'pkg/module'` by users who are certain that the CommonJS version will not be
-loaded anywhere in the application, such as by dependencies; or if the CommonJS
-version can be loaded but doesn’t affect the ES module version (for example,
-because the package is stateless):
+A variant of this approach not requiring conditional exports for consumers could
+be to add an export, e.g. `"./module"`, to point to an all-ES module-syntax
+version of the package. This could be used via `import 'pkg/module'` by users
+who are certain that the CommonJS version will not be loaded anywhere in the
+application, such as by dependencies; or if the CommonJS version can be loaded
+but doesn’t affect the ES module version (for example, because the package is
+stateless):
 
 <!-- eslint-skip -->
 ```js
@@ -601,16 +584,10 @@ because the package is stateless):
 }
 ```
 
-If the `--experimental-conditional-exports` flag is dropped and therefore
-[Conditional Exports][] become available without a flag, this variant could be
-easily updated to use conditional exports by adding conditions to the `"."`
-path; while keeping `"./module"` for backward compatibility.
-
 ##### Approach #2: Isolate State
 
 The most straightforward `package.json` would be one that defines the separate
-CommonJS and ES module entry points directly (requires
-`--experimental-conditional-exports`):
+CommonJS and ES module entry points directly:
 
 <!-- eslint-skip -->
 ```js
@@ -695,8 +672,8 @@ Even with isolated state, there is still the cost of possible extra code
 execution between the CommonJS and ES module versions of a package.
 
 As with the previous approach, a variant of this approach not requiring
-`--experimental-conditional-exports` for consumers could be to add an export,
-e.g. `"./module"`, to point to an all-ES module-syntax version of the package:
+conditional exports for consumers could be to add an export, e.g.
+`"./module"`, to point to an all-ES module-syntax version of the package:
 
 <!-- eslint-skip -->
 ```js
@@ -710,11 +687,6 @@ e.g. `"./module"`, to point to an all-ES module-syntax version of the package:
   }
 }
 ```
-
-If the `--experimental-conditional-exports` flag is dropped and therefore
-[Conditional Exports][] become available without a flag, this variant could be
-easily updated to use conditional exports by adding conditions to the `"."`
-path; while keeping `"./module"` for backward compatibility.
 
 ## `import` Specifiers
 
@@ -1571,19 +1543,17 @@ _defaultEnv_ is the conditional environment name priority array,
 
 **ESM_FORMAT**(_url_)
 
-> 1. Assert: _url_ corresponds to an existing file pathname.
+> 1. Assert: _url_ corresponds to an existing file.
 > 1. Let _pjson_ be the result of **READ_PACKAGE_SCOPE**(_url_).
 > 1. If _url_ ends in _".mjs"_, then
 >    1. Return _"module"_.
 > 1. If _url_ ends in _".cjs"_, then
 >    1. Return _"commonjs"_.
 > 1. If _pjson?.type_ exists and is _"module"_, then
->    1. If _url_ ends in _".js"_ or lacks a file extension, then
+>    1. If _url_ ends in _".js"_, then
 >       1. Return _"module"_.
 >    1. Throw an _Unsupported File Extension_ error.
 > 1. Otherwise,
->    1. If _url_ lacks a file extension, then
->       1. Return _"commonjs"_.
 >    1. Throw an _Unsupported File Extension_ error.
 
 **READ_PACKAGE_SCOPE**(_url_)

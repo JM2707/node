@@ -312,6 +312,12 @@ assert(!/Object/.test(
   );
 });
 
+{
+  const brokenLength = new Float32Array(2);
+  Object.defineProperty(brokenLength, 'length', { value: -1 });
+  assert.strictEqual(inspect(brokenLength), 'Float32Array(2) [ 0n, 0n ]');
+}
+
 assert.strictEqual(
   util.inspect(Object.create({}, {
     visible: { value: 1, enumerable: true },
@@ -2413,6 +2419,26 @@ assert.strictEqual(
     '  1, 1,         1, 1,',
     '  1, 1, 123456789',
     ']'
+  ].join('\n');
+
+  assert.strictEqual(out, expected);
+
+  // Unicode support. あ has a length of one and a width of two.
+  obj = [
+    '123', '123', '123', '123', 'あああ',
+    '123', '123', '123', '123', 'あああ'
+  ];
+
+  out = util.inspect(obj, { compact: 3 });
+
+  expected = [
+    '[',
+    "  '123',    '123',",
+    "  '123',    '123',",
+    "  'あああ', '123',",
+    "  '123',    '123',",
+    "  '123',    'あああ'",
+    ']',
   ].join('\n');
 
   assert.strictEqual(out, expected);

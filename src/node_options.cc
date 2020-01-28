@@ -325,10 +325,9 @@ EnvironmentOptionsParser::EnvironmentOptionsParser() {
             &EnvironmentOptions::userland_loader,
             kAllowedInEnvironment);
   AddAlias("--loader", "--experimental-loader");
-  AddAlias("--experimental-modules", "--experimental-conditional-exports");
-  AddOption("--experimental-conditional-exports",
-            "experimental support for conditional exports targets",
-            &EnvironmentOptions::experimental_conditional_exports,
+  AddOption("--experimental-modules",
+            "experimental modules features",
+            &EnvironmentOptions::experimental_modules,
             kAllowedInEnvironment);
   AddOption("--experimental-wasm-modules",
             "experimental ES Module support for webassembly modules",
@@ -757,6 +756,11 @@ PerProcessOptionsParser::PerProcessOptionsParser(
   AddOption("--use-largepages",
             "Map the Node.js static code to large pages",
             &PerProcessOptions::use_largepages,
+            kAllowedInEnvironment);
+
+  AddOption("--trace-sigint",
+            "enable printing JavaScript stacktrace on SIGINT",
+            &PerProcessOptions::trace_sigint,
             kAllowedInEnvironment);
 
   Insert(iop, &PerProcessOptions::get_per_isolate_options);
